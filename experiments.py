@@ -76,7 +76,10 @@ def data_retrieve(lead_months=3, window=3, use_heat_content=False,
         window_end = int(25 - lead_months + target_month) + 1
         window_start = int(25 - lead_months + target_month) + 1 - window
 
-        sst_vars = filtered_region.variables["sst"][:, window_start:window_end, :, :].to_numpy()
+        if data_type == "CMIP5":
+            sst_vars = filtered_region.variables["sst1"][:, window_start:window_end, :, :].to_numpy()
+        else:
+            sst_vars = filtered_region.variables["sst"][:, window_start:window_end, :, :].to_numpy()
         sst_vars = np.expand_dims(sst_vars, 1)
 
         X = sst_vars
@@ -89,9 +92,8 @@ def data_retrieve(lead_months=3, window=3, use_heat_content=False,
     
     y = label.variables["pr"][:, target_month, 0, 0].to_numpy()
 
-    print(y.shape)
+    # print(y.shape)
     
-
     '''
     X = (Time, Variables, Window, Latitude, Longitude)
     y = (Time)
@@ -101,9 +103,11 @@ def data_retrieve(lead_months=3, window=3, use_heat_content=False,
     TODO : DELETE Terrestrial Nodes
     '''
 
-    # if return_labels:
-    #     return X_early, y_early, labels
-    # return X_early, y_early
+    if return_labels:
+        return X, y, labels
+    return X, y
 
 
-data_retrieve(data_type="GODAS")
+X_g, y_g = data_retrieve(data = gd, label = gl, data_type="GODAS")
+X_s, y_s = data_retrieve(data = sd, label = sl, data_type="SODA")
+X_c, y_c = data_retrieve(data = cd, label = cl, data_type="CMIP5")
