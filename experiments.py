@@ -7,6 +7,8 @@ import pandas as pd
 from control.config import args
 import cftime
 
+from util.graph_adjacencies import temporal_graph
+
 godas_data = 'data/GODAS/GODAS.input.36mn.1980_2015.nc'
 godas_label = 'data/GODAS/GODAS.label.12mn_3mv.1982_2017.nc'
 soda_data = 'data/SODA/SODA.input.36mn.1871_1970.nc'
@@ -26,6 +28,9 @@ args.lon_min = 0
 args.lon_max = 360
 args.lat_min = -55
 args.lat_max = 60
+
+# args.lon_min = 340
+# args.lat_min = 30
 
 def data_retrieve(lead_months=3, window=3, use_heat_content=False, 
                   lon_min=args.lon_min, lon_max=args.lon_max, 
@@ -111,3 +116,19 @@ def data_retrieve(lead_months=3, window=3, use_heat_content=False,
 X_g, y_g = data_retrieve(data = gd, label = gl, data_type="GODAS")
 X_s, y_s = data_retrieve(data = sd, label = sl, data_type="SODA")
 X_c, y_c = data_retrieve(data = cd, label = cl, data_type="CMIP5")
+
+
+gd.close()
+gl.close()
+sd.close()
+sl.close()
+cd.close()
+cl.close()
+
+datum = [X_g, X_s, X_c]
+labels = [y_g, y_s, y_c]
+
+test_data = X_g[0, 0, :, :, :]
+print(test_data.shape)
+
+temporal_graph(test_data)
