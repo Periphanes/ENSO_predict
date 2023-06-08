@@ -14,7 +14,9 @@ parser.add_argument('--model', type=str, default="default_model")
 parser.add_argument('--epochs', type=int, default=100)
 parser.add_argument('--batch-size', type=int, default=16)
 
-
+parser.add_argument('--use-heat-content', type=bool, default=False)
+# k-hop neighborhood for the initial adjacency graphs before neural sparsification
+parser.add_argument('--adj-neighborhood', type=int, default=3)
 
 args = parser.parse_args()
 args.dir_root = os.getcwd()
