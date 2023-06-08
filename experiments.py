@@ -28,8 +28,10 @@ args.lat_min = -55
 args.lat_max = 60
 
 def data_retrieve(lead_months=3, window=3, use_heat_content=False, 
-                  lon_min=args.lon_min, lon_max=args.lon_max, lat_min=args.lat_min,
-                  lat_max=args.lat_max, data=gd, label=gl, mixed_months=False, target_month=5, data_type="CMIP5"):
+                  lon_min=args.lon_min, lon_max=args.lon_max, 
+                  lat_min=args.lat_min, lat_max=args.lat_max, 
+                  data=gd, label=gl, mixed_months=False, 
+                  target_month=5, data_type="CMIP5", return_labels=False):
     lat_p1, lat_p2 = int((lat_min+55)/5), min(int((lat_max+55)/5),23)
     lon_p1, lon_p2 = int(lon_min/5), min(int(lon_max/5),71)
 
@@ -43,12 +45,12 @@ def data_retrieve(lead_months=3, window=3, use_heat_content=False,
     )
     filtered_region = filtered_region.rename({"lev": "window", "time":"year"})
 
-    if mixed_months == False:
-        X_early = np.empty((data.sizes["time"], features, window, lat_sz, lon_sz))
-        y_early = np.empty((data.sizes["time"]))
-    else:
-        X_early = np.empty((data.sizes["time"]*12, features, window, lat_sz, lon_sz))
-        y_early = np.empty((data.sizes["time"]*12))
+    # if mixed_months == False:
+    #     X_early = np.empty((data.sizes["time"], features, window, lat_sz, lon_sz))
+    #     y_early = np.empty((data.sizes["time"]))
+    # else:
+    #     X_early = np.empty((data.sizes["time"]*12, features, window, lat_sz, lon_sz))
+    #     y_early = np.empty((data.sizes["time"]*12))
     
     time = (label.get_index("time") / (24 * 365)).astype(int)
     
@@ -65,6 +67,43 @@ def data_retrieve(lead_months=3, window=3, use_heat_content=False,
     elif data_type == "SODA":
         time = time + 1873
 
-    print(time)
+    lat_labels = filtered_region.get_index('lat')
+    lon_labels = filtered_region.get_index('lon')
+
+    labels = (time, lat_labels, lon_labels)
+
+    if mixed_months == False:
+        window_end = int(25 - lead_months + target_month) + 1
+        window_start = int(25 - lead_months + target_month) + 1 - window
+
+        sst_vars = filtered_region.variables["sst"][:, window_start:window_end, :, :].to_numpy()
+        sst_vars = np.expand_dims(sst_vars, 1)
+
+        X = sst_vars
+
+        if use_heat_content:
+            heat_vars = filtered_region.variables["t300"][:, window_start:window_end, :, :].to_numpy()
+            heat_vars = np.expand_dims(heat_vars, 1)
+
+            X = np.concatenate((sst_vars, heat_vars), 1)
+    
+    y = label.variables["pr"][:, target_month, 0, 0].to_numpy()
+
+    print(y.shape)
+    
+
+    '''
+    X = (Time, Variables, Window, Latitude, Longitude)
+    y = (Time)
+    '''
+
+    '''
+    TODO : DELETE Terrestrial Nodes
+    '''
+
+    # if return_labels:
+    #     return X_early, y_early, labels
+    # return X_early, y_early
+
 
 data_retrieve(data_type="GODAS")
