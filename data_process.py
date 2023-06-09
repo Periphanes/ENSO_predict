@@ -113,22 +113,29 @@ def data_retrieve(lead_months=3, window=3, use_heat_content=False,
     return X, y
 
 
-X_g, y_g = data_retrieve(data = gd, label = gl, data_type="GODAS")
-X_s, y_s = data_retrieve(data = sd, label = sl, data_type="SODA")
-X_c, y_c = data_retrieve(data = cd, label = cl, data_type="CMIP5")
+
+def return_data(lead_months, window, target_month, use_heat_content):
+    X_g, y_g = data_retrieve(data = gd, label = gl, data_type="GODAS", 
+                             lead_months=lead_months, window=window, target_month=target_month, use_heat_content=use_heat_content)
+    X_s, y_s = data_retrieve(data = sd, label = sl, data_type="SODA",
+                             lead_months=lead_months, window=window, target_month=target_month, use_heat_content=use_heat_content)
+    X_c, y_c = data_retrieve(data = cd, label = cl, data_type="CMIP5",
+                             lead_months=lead_months, window=window, target_month=target_month, use_heat_content=use_heat_content)
+
+    gd.close()
+    gl.close()
+    sd.close()
+    sl.close()
+    cd.close()
+    cl.close()
+
+    datum = [X_g, X_s, X_c]
+    labels = [y_g, y_s, y_c]
+
+    return datum, labels
 
 
-gd.close()
-gl.close()
-sd.close()
-sl.close()
-cd.close()
-cl.close()
+# test_data = X_g[0, 0, :, :, :]
+# print(test_data.shape)
 
-datum = [X_g, X_s, X_c]
-labels = [y_g, y_s, y_c]
-
-test_data = X_g[0, 0, :, :, :]
-print(test_data.shape)
-
-temporal_graph(test_data)
+# temporal_graph(test_data)
